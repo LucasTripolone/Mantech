@@ -212,17 +212,19 @@ export default function ReportScreen() {
 
       {/* NAVEGACIÓN INFERIOR */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/report')}>
           <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Mis Reportes</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
           <Ionicons name="time-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Historial</Text>
         </TouchableOpacity>
+        
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/support')}>
-            <Feather name="info" size={28} color="#0B3A6E" />
-            <Text style={styles.navText}>Soporte</Text>
+          <Feather name="info" size={28} color="#0B3A6E" />
+          <Text style={styles.navText}>Soporte</Text>
         </TouchableOpacity>
       </View>
 

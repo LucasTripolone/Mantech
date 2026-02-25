@@ -99,16 +99,18 @@ export default function SupportScreen() {
 
       {/* NAVEGACIÓN INFERIOR (Soporte Activo) */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/report')}>
           <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Mis Reportes</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navItem}>
+        {/* Le agregamos la ruta para que también te lleve al inicio o a donde decidas */}
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
           <Ionicons name="time-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Historial</Text>
         </TouchableOpacity>
         
+        {/* Este queda igual porque es la pantalla actual */}
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
           <Feather name="info" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Soporte</Text>

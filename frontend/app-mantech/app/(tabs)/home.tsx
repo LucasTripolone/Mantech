@@ -1,9 +1,55 @@
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Modal, Alert } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 export default function HomeScreen() {
   const router = useRouter();
+  
+  // Estados para controlar la cámara
+  const [permission, requestPermission] = useCameraPermissions();
+  const [isScanning, setIsScanning] = useState(false);
+
+  // Función para abrir la cámara (con logs de diagnóstico)
+  const handleOpenScanner = async () => {
+    console.log("Botón presionado. Permiso actual:", permission?.granted);
+
+    // Si todavía está cargando el estado de los permisos de Expo, no hacemos nada
+    if (!permission) return;
+
+    // Si no tenemos permiso, lo pedimos
+    if (!permission.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert("Permiso Denegado", "Necesitamos acceso a la cámara para escanear el QR de la máquina.");
+        return;
+      }
+    }
+    
+    // Si llegamos acá, tenemos permiso, así que abrimos el modal
+    console.log("Permiso concedido, abriendo cámara...");
+    setIsScanning(true);
+  };
+
+  // Función que se ejecuta cuando la cámara lee un QR (con TypeScript arreglado)
+  const handleBarcodeScanned = ({ data }: { data: string }) => {
+    setIsScanning(false); // Cerramos la cámara al instante
+    
+    // Mostramos la alerta prudente y lo llevamos a reportar
+    Alert.alert(
+      "Máquina Detectada",
+      `Código QR escaneado:\n${data}\n\n¿Querés abrir un reporte para esta máquina?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Reportar Falla", 
+          onPress: () => router.push('/report') 
+        }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* HEADER SUPERIOR */}
@@ -34,7 +80,10 @@ export default function HomeScreen() {
         {/* TARJETA QR */}
         <View style={styles.qrCard}>
           <MaterialCommunityIcons name="qrcode-scan" size={100} color="#0F172A" style={styles.qrIcon} />
-          <TouchableOpacity style={styles.qrButton}>
+          <TouchableOpacity 
+            style={styles.qrButton} 
+            onPress={handleOpenScanner} 
+          >
             <Text style={styles.qrButtonText}>ESCANEAR QR</Text>
           </TouchableOpacity>
         </View>
@@ -59,7 +108,7 @@ export default function HomeScreen() {
         <View style={styles.actionsCard}>
           <TouchableOpacity 
             style={styles.actionButton} 
-            onPress={() => router.push('/report')} // <-- Agregá esto
+            onPress={() => router.push('/report')}
           >
             <Feather name="camera" size={30} color="#0B3A6E" />
             <Text style={styles.actionText}>Capturar{"\n"}Falla</Text>
@@ -84,19 +133,19 @@ export default function HomeScreen() {
         </View>
 
         {/* SOBRE NOSOTROS */}
-      <TouchableOpacity 
-        style={styles.aboutUsContainer}
-        onPress={() => router.push('/about')} // <-- Agregá esta línea
-      >
-        <MaterialCommunityIcons name="account-star-outline" size={32} color="#0B3A6E" />
-        <Text style={styles.aboutUsText}>Sobre Nosotros</Text>
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.aboutUsContainer}
+          onPress={() => router.push('/about')}
+        >
+          <MaterialCommunityIcons name="account-star-outline" size={32} color="#0B3A6E" />
+          <Text style={styles.aboutUsText}>Sobre Nosotros</Text>
+        </TouchableOpacity>
 
       </ScrollView>
 
       {/* NAVEGACIÓN INFERIOR */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/report')}>
           <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Mis Reportes</Text>
         </TouchableOpacity>
@@ -112,6 +161,34 @@ export default function HomeScreen() {
           <Text style={styles.navText}>Soporte</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ========================================================= 
+          MODAL DE LA CÁMARA PARA ESCANEAR QR
+      ========================================================= */}
+      <Modal visible={isScanning} animationType="slide" transparent={false}>
+        <View style={styles.cameraContainer}>
+          <View style={styles.cameraHeader}>
+            <Text style={styles.cameraTitle}>Escaneando QR...</Text>
+            <TouchableOpacity onPress={() => setIsScanning(false)} style={styles.cameraCloseBtn}>
+              <Feather name="x" size={30} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          <CameraView
+            style={styles.cameraView}
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr"],
+            }}
+            onBarcodeScanned={isScanning ? handleBarcodeScanned : undefined}
+          >
+            {/* Dibujamos un marco visual para guiar al usuario */}
+            <View style={styles.scannerOverlay}>
+              <View style={styles.scannerFrame} />
+            </View>
+          </CameraView>
+        </View>
+      </Modal>
 
     </SafeAreaView>
   );
@@ -166,7 +243,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100, // Espacio para que el nav inferior no tape el contenido
+    paddingBottom: 100, 
   },
   machineHeader: {
     flexDirection: 'row',
@@ -198,8 +275,8 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    elevation: 4, // Esto le da la sombra en tu Xiaomi/Android
-    shadowColor: '#0F172A', // Esto es para iOS
+    elevation: 4, 
+    shadowColor: '#0F172A', 
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
@@ -352,5 +429,46 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: '#717171',
     borderRadius: 2,
+  },
+
+  /* ESTILOS DE LA CÁMARA Y MODAL */
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  cameraHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 15,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    zIndex: 10, 
+  },
+  cameraTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  cameraCloseBtn: {
+    padding: 5,
+  },
+  cameraView: {
+    flex: 1,
+  },
+  scannerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scannerFrame: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: '#4C84E6',
+    backgroundColor: 'transparent',
+    borderRadius: 20,
   }
 });

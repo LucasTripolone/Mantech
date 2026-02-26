@@ -1,9 +1,69 @@
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useCameraPermissions } from 'expo-camera';
+import QRScannerModal from '../components/QRScanner'; 
+import PhotoCameraModal from '../components/PhotoCamera'; // <-- IMPORTAMOS LA CÁMARA DE FOTOS
+import AudioRecorder from '../components/AudioRecorder'; // <-- IMPORTAMOS LA GRABADORA
+import { styles } from './report.styles';
 
 export default function ReportScreen() {
   const router = useRouter();
+
+  // Estados para permisos y modales
+  const [permission, requestPermission] = useCameraPermissions();
+  const [isScanning, setIsScanning] = useState(false);
+  const [isTakingPhoto, setIsTakingPhoto] = useState(false);
+  
+  // Estado para guardar el URI de la foto tomada
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+
+  // Funciones para el QR
+  const handleOpenScanner = async () => {
+    if (!permission) return;
+    if (!permission.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert("Permiso Denegado", "Se necesita acceso a la cámara para escanear la máquina.");
+        return;
+      }
+    }
+    setIsScanning(true);
+  };
+
+  const handleBarcodeScanned = (data: string) => {
+    setIsScanning(false);
+    Alert.alert(
+      "Máquina Identificada",
+      `Código escaneado: ${data}\n\nLos datos de la máquina se auto-completarán en el reporte.`,
+      [{ text: "Entendido" }]
+    );
+  };
+
+  // Funciones para la cámara de fotos
+  const handleOpenPhotoCamera = async () => {
+    if (!permission) return;
+    if (!permission.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert("Permiso Denegado", "Se necesita acceso a la cámara para tomar fotos.");
+        return;
+      }
+    }
+    setIsTakingPhoto(true);
+  };
+
+  const handlePhotoTaken = (uri: string) => {
+    setPhotoUri(uri);
+    Alert.alert("Foto guardada", "La foto se adjuntará al reporte.");
+  };
+
+  // Función para manejar el audio grabado
+  const handleAudioRecorded = (uri: string) => {
+    console.log("Audio guardado en un archivo temporal:", uri);
+    Alert.alert("Audio grabado", "El audio se adjuntará al reporte correctamente.");
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,27 +97,22 @@ export default function ReportScreen() {
           Saca una foto, con luz clara, del problema para que el Técnico lo arregle rápido.
         </Text>
 
+        {/* ÁREA DE FOTO ACTUALIZADA CON PREVISUALIZACIÓN */}
         <View style={styles.photoContainer}>
-          <MaterialCommunityIcons name="camera-image" size={60} color="#D9D9D9" />
-          <TouchableOpacity style={styles.newPhotoButton}>
+          {photoUri ? (
+             <Image source={{ uri: photoUri }} style={{ width: '100%', height: '100%', borderRadius: 10, resizeMode: 'cover' }} />
+          ) : (
+             <MaterialCommunityIcons name="camera-image" size={60} color="#D9D9D9" />
+          )}
+          
+          <TouchableOpacity style={styles.newPhotoButton} onPress={handleOpenPhotoCamera}>
             <Feather name="camera" size={18} color="#FFFFFF" />
-            <Text style={styles.newPhotoText}>Nueva Foto</Text>
+            <Text style={styles.newPhotoText}>{photoUri ? "Cambiar Foto" : "Nueva Foto"}</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.audioContainer}>
-          <View style={styles.audioHeader}>
-            <MaterialCommunityIcons name="microphone-outline" size={30} color="#0B3A6E" />
-            <Text style={styles.audioTitle}>Graba un Audio explicando{"\n"}el problema <Text style={styles.textLight}>(opcional)</Text></Text>
-          </View>
-          <View style={styles.audioPlayer}>
-            <MaterialCommunityIcons name="play-circle" size={40} color="#2F9E44" />
-            <Text style={styles.audioTime}>0:14</Text>
-            <View style={styles.progressBar}><View style={styles.progressFill} /></View>
-            <MaterialCommunityIcons name="pause-circle" size={40} color="#F59E0B" />
-            <Feather name="send" size={28} color="#0B3A6E" style={styles.sendIcon} />
-          </View>
-        </View>
+        {/* ÁREA DE AUDIO (Usamos el componente reutilizable nuevo) */}
+        <AudioRecorder onAudioRecorded={handleAudioRecorded} />
 
         <Text style={styles.inputLabel}>Detalle Opcional</Text>
         <View style={styles.inputContainer}>
@@ -83,7 +138,6 @@ export default function ReportScreen() {
         ========================================== */}
         <Text style={styles.sectionTitle}>Mis Últimos Reportes</Text>
 
-        {/* Item 1 */}
         <View style={styles.reportItem}>
           <View style={styles.reportHeader}>
             <View style={styles.reportStatus}>
@@ -95,7 +149,6 @@ export default function ReportScreen() {
           <Text style={styles.reportDesc}>Revisión correcta de Puente Grúa</Text>
         </View>
 
-        {/* Item 2 */}
         <View style={styles.reportItem}>
           <View style={styles.reportHeader}>
             <View style={styles.reportStatus}>
@@ -107,7 +160,6 @@ export default function ReportScreen() {
           <Text style={styles.reportDesc}>Ruido raro en Mezcladora</Text>
         </View>
 
-        {/* Item 3 */}
         <View style={styles.reportItem}>
           <View style={styles.reportHeader}>
             <View style={styles.reportStatus}>
@@ -147,7 +199,7 @@ export default function ReportScreen() {
         {/* ==========================================
             PANTALLA 3 (COMPACT 4) - DASHBOARD 
         ========================================== */}
-        <TouchableOpacity style={styles.qrBigButton}>
+        <TouchableOpacity style={styles.qrBigButton} onPress={handleOpenScanner}>
           <MaterialCommunityIcons name="qrcode-scan" size={24} color="#FFFFFF" />
           <Text style={styles.qrBigText}>ESCANEAR CÓDIGO QR</Text>
           <Feather name="chevron-right" size={24} color="#FFFFFF" />
@@ -212,7 +264,7 @@ export default function ReportScreen() {
 
       {/* NAVEGACIÓN INFERIOR */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/report')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
           <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Mis Reportes</Text>
         </TouchableOpacity>
@@ -228,88 +280,20 @@ export default function ReportScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DEL QR */}
+      <QRScannerModal 
+        visible={isScanning} 
+        onClose={() => setIsScanning(false)} 
+        onScan={handleBarcodeScanned} 
+      />
+
+      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DE LA FOTO */}
+      <PhotoCameraModal 
+        visible={isTakingPhoto}
+        onClose={() => setIsTakingPhoto(false)}
+        onPhotoTaken={handlePhotoTaken}
+      />
+
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F5F5F5' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 15, paddingBottom: 20 },
-  backButton: { padding: 5 },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#0F172A' },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 100 },
-  
-  // SECCIÓN 1
-  machineInfoContainer: { marginBottom: 15 },
-  machineTitleRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
-  machineName: { fontSize: 22, fontWeight: '700', color: '#0F172A', marginLeft: 10, flex: 1 },
-  badgePreventivo: { flexDirection: 'row', backgroundColor: '#F59E0B', alignSelf: 'flex-end', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center', marginTop: -20 },
-  badgeIcon: { marginRight: 5 },
-  badgeText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
-  instructions: { fontSize: 16, fontWeight: '500', color: '#0F172A', lineHeight: 22, marginBottom: 20 },
-  photoContainer: { backgroundColor: '#E2E8F0', height: 180, borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginBottom: 20, position: 'relative' },
-  newPhotoButton: { position: 'absolute', bottom: -15, right: 20, backgroundColor: '#2F9E44', flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15, borderRadius: 8, elevation: 4 },
-  newPhotoText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16, marginLeft: 8 },
-  audioContainer: { backgroundColor: 'rgba(11, 58, 110, 0.05)', borderWidth: 1, borderColor: 'rgba(11, 58, 110, 0.2)', borderRadius: 10, padding: 15, marginBottom: 25, marginTop: 10 },
-  audioHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
-  audioTitle: { fontSize: 16, fontWeight: '600', color: '#000000', marginLeft: 10 },
-  textLight: { fontWeight: '400', color: '#717171' },
-  audioPlayer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 10, padding: 10 },
-  audioTime: { fontSize: 16, fontWeight: '600', color: '#0F172A', marginLeft: 10 },
-  progressBar: { flex: 1, height: 4, backgroundColor: '#E2E8F0', marginHorizontal: 10, borderRadius: 2 },
-  progressFill: { width: '30%', height: '100%', backgroundColor: '#0F172A', borderRadius: 2 },
-  sendIcon: { marginLeft: 15 },
-  inputLabel: { fontSize: 18, fontWeight: '700', color: '#0F172A', marginBottom: 10 },
-  inputContainer: { backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E2E8F0', borderRadius: 10, height: 120, padding: 15, marginBottom: 15 },
-  textInput: { flex: 1, fontSize: 16, color: '#0F172A' },
-  charCount: { textAlign: 'right', fontSize: 12, color: '#717171', marginTop: 5 },
-  noteContainer: { flexDirection: 'row', backgroundColor: 'rgba(11, 58, 110, 0.05)', padding: 15, borderRadius: 10, alignItems: 'center' },
-  noteText: { flex: 1, fontSize: 13, color: '#0F172A', marginLeft: 10, lineHeight: 18 },
-  divider: { height: 1, backgroundColor: '#D9D9D9', marginVertical: 30 },
-
-  // SECCIÓN 2
-  sectionTitle: { fontSize: 20, fontWeight: '700', color: '#000000', marginBottom: 15 },
-  reportItem: { backgroundColor: '#FFFFFF', borderRadius: 10, padding: 15, marginBottom: 15, borderWidth: 1, borderColor: '#E2E8F0' },
-  reportHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  reportStatus: { flexDirection: 'row', alignItems: 'center' },
-  statusText: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginLeft: 5 },
-  reportDate: { fontSize: 13, color: '#717171' },
-  reportDesc: { fontSize: 16, color: '#0F172A', marginBottom: 10 },
-  linkButton: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },
-  linkText: { fontSize: 14, color: '#0B3A6E', marginRight: 5 },
-  newReportButton: { flexDirection: 'row', backgroundColor: '#FFFFFF', padding: 15, borderRadius: 10, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 20 },
-  newReportText: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginLeft: 10 },
-  emergencyBanner: { flexDirection: 'row', backgroundColor: '#FFFFFF', borderRadius: 10, overflow: 'hidden', borderWidth: 1, borderColor: '#E2E8F0' },
-  emergencyLeft: { backgroundColor: '#DC2626', padding: 15, justifyContent: 'center', alignItems: 'center', width: '40%' },
-  emergencyTitle: { color: '#FFFFFF', fontWeight: '700', marginBottom: 5 },
-  emergencyRight: { flexDirection: 'row', padding: 15, alignItems: 'center', width: '60%' },
-  emergencyNumber: { fontSize: 24, fontWeight: '900', color: '#000000', marginLeft: 10 },
-  emergencySub: { fontSize: 12, color: '#717171', marginLeft: 10 },
-
-  // SECCIÓN 3
-  qrBigButton: { flexDirection: 'row', backgroundColor: '#4C84E6', borderRadius: 10, padding: 18, alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 },
-  qrBigText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
-  metricsCard: { backgroundColor: '#FFFFFF', borderRadius: 10, padding: 15, marginBottom: 20, elevation: 2 },
-  metricsTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  metricItem: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  metricDivider: { width: 1, height: 40, backgroundColor: '#E2E8F0', marginHorizontal: 15 },
-  metricValueGreen: { fontSize: 22, fontWeight: '700', color: '#2F9E44', marginLeft: 10 },
-  metricValueBlack: { fontSize: 22, fontWeight: '700', color: '#0F172A', marginLeft: 10 },
-  metricLabel: { fontSize: 12, color: '#0F172A', marginLeft: 10 },
-  metricsBottom: { flexDirection: 'row', alignItems: 'center', borderTopWidth: 1, borderTopColor: '#E2E8F0', paddingTop: 15 },
-  metricHighlight: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginLeft: 10 },
-  actionMenuCard: { backgroundColor: '#FFFFFF', borderRadius: 10, marginBottom: 20, elevation: 2 },
-  menuRow: { flexDirection: 'row', alignItems: 'center', padding: 15 },
-  menuText: { flex: 1, fontSize: 16, fontWeight: '600', color: '#0F172A', marginLeft: 15 },
-  menuLine: { height: 1, backgroundColor: '#E2E8F0' },
-  helpText: { fontSize: 14, color: '#717171', textAlign: 'center', marginBottom: 20, paddingHorizontal: 10 },
-  templateCard: { backgroundColor: '#FFFFFF', borderRadius: 10, padding: 15, elevation: 2 },
-  templateHeader: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5F5F5', padding: 10, borderRadius: 8, marginBottom: 15 },
-  templateTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A', marginLeft: 10 },
-  templateLine: { height: 1, backgroundColor: '#E2E8F0', marginBottom: 15 },
-
-  // BOTTOM NAV
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: '#FFFFFF', paddingVertical: 10, justifyContent: 'space-around', borderTopLeftRadius: 20, borderTopRightRadius: 20, elevation: 10 },
-  navItem: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
-  navText: { fontSize: 12, fontWeight: '500', color: '#0F172A', marginTop: 4 }
-});

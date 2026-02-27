@@ -79,5 +79,23 @@ export const styles = StyleSheet.create({
   // BOTTOM NAV
   bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: '#FFFFFF', paddingVertical: 10, justifyContent: 'space-around', borderTopLeftRadius: 20, borderTopRightRadius: 20, elevation: 10 },
   navItem: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
-  navText: { fontSize: 12, fontWeight: '500', color: '#0F172A', marginTop: 4 }
+  navText: { fontSize: 12, fontWeight: '500', color: '#0F172A', marginTop: 4 },
+
+  submitReportButton: {
+    backgroundColor: '#4C84E6',
+    borderRadius: 10,
+    paddingVertical: 18,
+    alignItems: 'center',
+    marginTop: 20,
+    elevation: 3,
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  submitReportText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
 });

@@ -21,17 +21,20 @@ export default function QRScannerModal({ visible, onClose, onScan }: QRScannerMo
           </TouchableOpacity>
         </View>
 
-        <CameraView
-          style={styles.cameraView}
-          facing="back"
-          barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-          onBarcodeScanned={visible ? ({ data }) => onScan(data) : undefined}
-        >
-          {/* Marco visual */}
+        {/* CONTENEDOR NUEVO PARA SUPERPONER */}
+        <View style={{ flex: 1 }}>
+          <CameraView
+            style={styles.absoluteCamera} // <-- Usamos la clase nueva en vez de StyleSheet
+            facing="back"
+            barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+            onBarcodeScanned={visible ? ({ data }) => onScan(data) : undefined}
+          />
+          {/* Marco visual superpuesto */}
           <View style={styles.scannerOverlay}>
             <View style={styles.scannerFrame} />
           </View>
-        </CameraView>
+        </View>
+
       </View>
     </Modal>
   );

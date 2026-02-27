@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
-import QRScannerModal from '../components/QRScanner'; 
-import { styles } from './home.styles'; // <-- IMPORTAMOS LOS ESTILOS
+import QRScannerModal from '../components/QRScanner'; // Ajustá el nombre si le pusiste solo QRScanner
+import PhotoCameraModal from '../components/PhotoCamera'; 
+import BottomNav from '../components/BottomNav'; // <-- IMPORTAMOS EL MENÚ REUTILIZABLE
+import { styles } from '../styles/home.styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const router = useRouter();
   
-  // Estados para controlar la cámara
+  // Estados para controlar los modales
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
+  const [isTakingPhoto, setIsTakingPhoto] = useState(false);
 
-  // Función para abrir la cámara
+  // Función para abrir el QR
   const handleOpenScanner = async () => {
     if (!permission) return;
     if (!permission.granted) {
@@ -26,7 +30,6 @@ export default function HomeScreen() {
     setIsScanning(true);
   };
 
-  // Función que se ejecuta cuando la cámara lee un QR
   const handleBarcodeScanned = (data: string) => {
     setIsScanning(false); 
     Alert.alert(
@@ -40,6 +43,29 @@ export default function HomeScreen() {
         }
       ]
     );
+  };
+
+  // Función para abrir la cámara de fotos
+  const handleOpenPhotoCamera = async () => {
+    if (!permission) return;
+    if (!permission.granted) {
+      const result = await requestPermission();
+      if (!result.granted) {
+        Alert.alert("Permiso Denegado", "Se necesita acceso a la cámara para tomar fotos.");
+        return;
+      }
+    }
+    setIsTakingPhoto(true);
+  };
+
+  // Función que se ejecuta cuando tomaste la foto y le diste a "Usar Foto"
+  const handlePhotoTaken = (uri: string) => {
+    setIsTakingPhoto(false);
+    // Navegamos a la pantalla de reporte y le pasamos la foto por parámetro
+    router.push({
+      pathname: '/report',
+      params: { initialPhotoUri: uri }
+    });
   };
 
   return (
@@ -95,7 +121,7 @@ export default function HomeScreen() {
 
         {/* TARJETA DE ACCIONES */}
         <View style={styles.actionsCard}>
-          <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/report')}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleOpenPhotoCamera}>
             <Feather name="camera" size={30} color="#0B3A6E" />
             <Text style={styles.actionText}>Capturar{"\n"}Falla</Text>
           </TouchableOpacity>
@@ -126,30 +152,21 @@ export default function HomeScreen() {
 
       </ScrollView>
 
-      {/* NAVEGACIÓN INFERIOR */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/report')}>
-          <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Mis Reportes</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
-          <Ionicons name="time-outline" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Historial</Text>
-          <View style={styles.activeIndicator} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/support')}>
-          <Feather name="info" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Soporte</Text>
-        </TouchableOpacity>
-      </View>
+      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DEL MENÚ INFERIOR */}
+      <BottomNav activeRoute="home" />
 
-      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DE LA CÁMARA */}
+      {/* MODAL QR */}
       <QRScannerModal 
         visible={isScanning} 
         onClose={() => setIsScanning(false)} 
         onScan={handleBarcodeScanned} 
+      />
+
+      {/* MODAL DE FOTO */}
+      <PhotoCameraModal 
+        visible={isTakingPhoto}
+        onClose={() => setIsTakingPhoto(false)}
+        onPhotoTaken={handlePhotoTaken}
       />
 
     </SafeAreaView>

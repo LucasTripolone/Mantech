@@ -1,8 +1,9 @@
 import React from 'react';
-import { Text, View, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { styles } from './index.styles'; // <-- IMPORTAMOS LOS ESTILOS ACÁ
+import { styles } from '../styles/index.styles'; // <-- IMPORTAMOS LOS ESTILOS ACÁ
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const router = useRouter();

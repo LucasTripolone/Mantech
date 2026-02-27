@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
 import { Text, View, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, Feather, MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
-import QRScannerModal from '../components/QRScanner'; 
-import PhotoCameraModal from '../components/PhotoCamera'; // <-- IMPORTAMOS LA CÁMARA DE FOTOS
-import AudioRecorder from '../components/AudioRecorder'; // <-- IMPORTAMOS LA GRABADORA
+import QRScannerModal from '../components/QRScanner'; // Asegurate de que este nombre coincida con tu archivo
+import PhotoCameraModal from '../components/PhotoCamera'; 
+import AudioRecorder from '../components/AudioRecorder'; 
+import BottomNav from '../components/BottomNav'; // <-- IMPORTAMOS EL MENÚ INFERIOR
 import { styles } from './report.styles';
 
 export default function ReportScreen() {
   const router = useRouter();
+
+  // Atrapamos los parámetros que nos mandan desde el Home
+  const { initialPhotoUri } = useLocalSearchParams<{ initialPhotoUri: string }>();
 
   // Estados para permisos y modales
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   
-  // Estado para guardar el URI de la foto tomada
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  // Si viene una foto por parámetro, la cargamos por defecto.
+  const [photoUri, setPhotoUri] = useState<string | null>(initialPhotoUri || null);
 
   // Funciones para el QR
   const handleOpenScanner = async () => {
@@ -65,6 +69,15 @@ export default function ReportScreen() {
     Alert.alert("Audio grabado", "El audio se adjuntará al reporte correctamente.");
   };
 
+  // Simula el envío del reporte
+  const handleSubmitReport = () => {
+    Alert.alert(
+      "Reporte Enviado", 
+      "Tu falla ha sido registrada y enviada a Mantenimiento exitosamente.",
+      [{ text: "OK" }]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       
@@ -97,7 +110,6 @@ export default function ReportScreen() {
           Saca una foto, con luz clara, del problema para que el Técnico lo arregle rápido.
         </Text>
 
-        {/* ÁREA DE FOTO ACTUALIZADA CON PREVISUALIZACIÓN */}
         <View style={styles.photoContainer}>
           {photoUri ? (
              <Image source={{ uri: photoUri }} style={{ width: '100%', height: '100%', borderRadius: 10, resizeMode: 'cover' }} />
@@ -111,7 +123,6 @@ export default function ReportScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ÁREA DE AUDIO (Usamos el componente reutilizable nuevo) */}
         <AudioRecorder onAudioRecorded={handleAudioRecorded} />
 
         <Text style={styles.inputLabel}>Detalle Opcional</Text>
@@ -130,6 +141,10 @@ export default function ReportScreen() {
           <Feather name="alert-circle" size={20} color="#717171" />
           <Text style={styles.noteText}>NOTA: Podés escribir sólo como guía y adjuntar audio si no podés usar el teclado.</Text>
         </View>
+
+        <TouchableOpacity style={styles.submitReportButton} onPress={handleSubmitReport}>
+          <Text style={styles.submitReportText}>Agregar Reporte</Text>
+        </TouchableOpacity>
 
         <View style={styles.divider} />
 
@@ -262,32 +277,16 @@ export default function ReportScreen() {
 
       </ScrollView>
 
-      {/* NAVEGACIÓN INFERIOR */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
-          <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Mis Reportes</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
-          <Ionicons name="time-outline" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Historial</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/support')}>
-          <Feather name="info" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Soporte</Text>
-        </TouchableOpacity>
-      </View>
+      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DEL MENÚ INFERIOR */}
+      <BottomNav activeRoute="report" />
 
-      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DEL QR */}
+      {/* MODALES */}
       <QRScannerModal 
         visible={isScanning} 
         onClose={() => setIsScanning(false)} 
         onScan={handleBarcodeScanned} 
       />
 
-      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DE LA FOTO */}
       <PhotoCameraModal 
         visible={isTakingPhoto}
         onClose={() => setIsTakingPhoto(false)}

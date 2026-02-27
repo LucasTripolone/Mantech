@@ -1,7 +1,9 @@
-import { Text, View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { styles } from './about.styles'; // <-- IMPORTAMOS LOS ESTILOS
+import BottomNav from '../components/BottomNav'; // <-- IMPORTAMOS EL MENÚ INFERIOR
+import { styles } from '../styles/about.styles'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AboutScreen() {
   const router = useRouter();
@@ -86,24 +88,9 @@ export default function AboutScreen() {
 
       </ScrollView>
 
-      {/* NAVEGACIÓN INFERIOR */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/report')}>
-          <Ionicons name="document-text-outline" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Mis Reportes</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={[styles.navItem, styles.navItemActive]} onPress={() => router.push('/home')}>
-          <Ionicons name="time-outline" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Historial</Text>
-          <View style={styles.activeIndicator} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/support')}>
-          <Feather name="info" size={28} color="#0B3A6E" />
-          <Text style={styles.navText}>Soporte</Text>
-        </TouchableOpacity>
-      </View>
+      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DEL MENÚ INFERIOR */}
+      <BottomNav activeRoute="home" />
+      
     </SafeAreaView>
   );
 }

@@ -1,10 +1,21 @@
-import { Text, View, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { styles } from './support.styles'; // <-- IMPORTAMOS LOS ESTILOS
+import { styles } from '../styles/support.styles';
+import { SafeAreaView } from 'react-native-safe-area-context'; 
 
 export default function SupportScreen() {
   const router = useRouter();
+
+  // Función para abrir el marcador telefónico
+  const handlePhonePress = () => {
+    Linking.openURL('tel:+5403496123456');
+  };
+
+  // Función para abrir la app de correos (Gmail, etc.)
+  const handleEmailPress = () => {
+    Linking.openURL('mailto:help@mantech.com?subject=Soporte%20App%20Mantech');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -30,8 +41,8 @@ export default function SupportScreen() {
           ¿Necesitas Ayuda?  <Text style={styles.separator}>|</Text>  ¿Problemas en la Planta?
         </Text>
 
-        {/* TARJETA: TELÉFONO */}
-        <TouchableOpacity style={styles.contactCard}>
+        {/* TARJETA: TELÉFONO (Ahora funciona) */}
+        <TouchableOpacity style={styles.contactCard} onPress={handlePhonePress}>
           <Feather name="phone-call" size={32} color="#0B3A6E" style={styles.cardIcon} />
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>Contactar por Teléfono</Text>
@@ -42,8 +53,8 @@ export default function SupportScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* TARJETA: CORREO */}
-        <TouchableOpacity style={styles.contactCard}>
+        {/* TARJETA: CORREO (Ahora funciona) */}
+        <TouchableOpacity style={styles.contactCard} onPress={handleEmailPress}>
           <MaterialCommunityIcons name="message-text-outline" size={32} color="#0B3A6E" style={styles.cardIcon} />
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>Enviar Gmail a:</Text>
@@ -87,6 +98,14 @@ export default function SupportScreen() {
             </View>
           </View>
 
+          <View style={styles.faqItem}>
+            <Ionicons name="checkmark-circle" size={20} color="#4C84E6" style={styles.faqCheck} />
+            <View style={styles.faqTextContainer}>
+              <Text style={styles.question}>¿Cómo sé si mi reporte fue visto por mantenimiento?</Text>
+              <Text style={styles.answer}>En Mis Reportes vas a ver el estado del caso: 🟡 En revisión · 🟢 En proceso · 🔵 Resuelto. También te llega una notificación cuando cambie el estado.</Text>
+            </View>
+          </View>
+
           <View style={styles.faqDivider} />
 
           <TouchableOpacity style={styles.moreFaqButton}>
@@ -105,13 +124,11 @@ export default function SupportScreen() {
           <Text style={styles.navText}>Mis Reportes</Text>
         </TouchableOpacity>
         
-        {/* Le agregamos la ruta para que también te lleve al inicio o a donde decidas */}
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
           <Ionicons name="time-outline" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Historial</Text>
         </TouchableOpacity>
         
-        {/* Este queda igual porque es la pantalla actual */}
         <TouchableOpacity style={[styles.navItem, styles.navItemActive]}>
           <Feather name="info" size={28} color="#0B3A6E" />
           <Text style={styles.navText}>Soporte</Text>

@@ -1,0 +1,43 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: mantech_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mantech_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mantech_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mantech_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mantech_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: 4d4a6f436e4c72576e5a7142764d466f4e6b6a304b65336b6f464a5259754d74
+      JWT_EXPIRATION: 86400000
+    volumes:
+      - uploads_data:/app/uploads
+
+volumes:
+  postgres_data:
+  uploads_data:

@@ -5,6 +5,7 @@ import com.mantech.app.dto.MachineResponse;
 import com.mantech.app.service.MachineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,12 @@ import java.util.Map;
 public class MachineController {
 
     private final MachineService machineService;
+
+    // GET /api/machines — listado de máquinas/activos
+    @GetMapping
+    public ResponseEntity<List<MachineResponse>> listAll() {
+        return ResponseEntity.ok(machineService.listAll());
+    }
 
     // GET /api/machines/qr/{qrCode} — escaneo desde la app
     @GetMapping("/qr/{qrCode}")
@@ -36,7 +43,10 @@ public class MachineController {
     }
 
     // PATCH /api/machines/{id}/status
+    // El estado alimenta la pagina publica del QR que se pega en la maquina, asi
+    // que solo el personal de mantenimiento y las jefaturas pueden cambiarlo.
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('MANTENIMIENTO','SUPERVISOR','JEFE_PLANTA')")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id,
                                              @RequestBody Map<String, String> body) {
         machineService.updateStatus(id, body.get("status"), body.get("reason"));

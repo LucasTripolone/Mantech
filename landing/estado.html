@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estado de máquina — Mantech Latam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#0B3A6E; --blue-deep:#07294d; --ink:#0F172A; --muted:#64748B; --bg:#eef2f7; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:linear-gradient(160deg,#07294d 0%, #0B3A6E 38%, #eef2f7 38%); min-height:100vh; color:var(--ink); -webkit-font-smoothing:antialiased; }
+    .wrap { max-width:480px; margin:0 auto; padding:22px 18px 40px; }
+    .topbar { display:flex; align-items:center; gap:10px; color:#fff; margin-bottom:22px; }
+    .m { width:34px; height:34px; border-radius:9px; background:#fff; color:var(--blue); font-weight:900; font-size:20px; display:grid; place-items:center; }
+    .brand { font-size:18px; font-weight:800; } .brand span { font-weight:400; opacity:.85; }
+
+    .card { background:#fff; border-radius:22px; box-shadow:0 20px 50px rgba(7,30,60,.25); overflow:hidden; }
+    .head { padding:24px 22px 20px; color:#fff; position:relative; }
+    .head.ok    { background:linear-gradient(135deg,#16a34a,#15803D); }
+    .head.warn  { background:linear-gradient(135deg,#f59e0b,#B45309); }
+    .head.fail  { background:linear-gradient(135deg,#ef4444,#B91C1C); }
+    .head.load  { background:linear-gradient(135deg,#475569,#334155); }
+    .statusbadge { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.35); padding:6px 14px; border-radius:999px; font-size:13px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; }
+    .head h1 { font-size:28px; font-weight:900; letter-spacing:-.5px; margin:14px 0 4px; }
+    .head .sub { opacity:.9; font-size:14px; }
+    .pulse { width:11px; height:11px; border-radius:50%; background:#fff; box-shadow:0 0 0 0 rgba(255,255,255,.7); animation:pulse 1.6s infinite; }
+    @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(255,255,255,.6);} 70%{box-shadow:0 0 0 12px rgba(255,255,255,0);} 100%{box-shadow:0 0 0 0 rgba(255,255,255,0);} }
+
+    .kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:#eef2f7; }
+    .kpi { background:#fff; padding:16px 10px; text-align:center; }
+    .kpi .v { font-size:20px; font-weight:900; color:var(--blue); }
+    .kpi .l { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    .section-t { padding:18px 22px 6px; font-size:13px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; display:flex; align-items:center; gap:8px; }
+    .sensors { padding:6px 16px 8px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .sensor { background:#f8fafc; border:1px solid #eef1f5; border-radius:14px; padding:14px; }
+    .sensor .row { display:flex; align-items:center; justify-content:space-between; }
+    .sensor .name { font-size:13px; color:var(--muted); font-weight:600; }
+    .sensor .val { font-size:22px; font-weight:900; }
+    .sensor .unit { font-size:13px; font-weight:600; color:var(--muted); margin-left:3px; }
+    .bar { height:6px; border-radius:6px; background:#e5e7eb; margin-top:10px; overflow:hidden; }
+    .bar > i { display:block; height:100%; border-radius:6px; }
+    .c-ok{color:#15803D;} .c-warn{color:#B45309;} .c-fail{color:#B91C1C;}
+    .b-ok{background:#16a34a;} .b-warn{background:#f59e0b;} .b-fail{background:#ef4444;}
+
+    .foot { padding:18px 22px 22px; }
+    .updated { text-align:center; font-size:12px; color:var(--muted); margin-bottom:14px; }
+    .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:linear-gradient(135deg,#1457b0,#0B3A6E); color:#fff; font-weight:800; font-size:15px; padding:15px; border-radius:14px; text-decoration:none; }
+    .powered { text-align:center; color:rgba(255,255,255,.7); font-size:12px; margin-top:20px; }
+    .powered b { color:#fff; }
+    .err { padding:30px 22px; text-align:center; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="m">M</div>
+      <div class="brand">Mantech <span>Latam</span></div>
+    </div>
+
+    <div class="card" id="card">
+      <div class="head load">
+        <span class="statusbadge"><span class="pulse"></span> Cargando…</span>
+        <h1 id="mname">Buscando máquina…</h1>
+        <div class="sub" id="msub">Leyendo estado en tiempo real</div>
+      </div>
+    </div>
+
+    <div class="powered">Powered by <b>Mantech</b> · Gestión de mantenimiento industrial</div>
+  </div>
+
+  <script>
+    const API = 'https://api.mantech.lat';
+    const APP = 'https://app.mantech.lat';
+
+    // Fallback embebido (a prueba de fallos para el demo)
+    const FALLBACK = {
+      'QR-PRENSA-14': { name:'Prensa #14', sector:'Línea de Producción 1', criticality:'ALTA', currentStatus:'OPERATIVA', availabilityPercent:98.2, mttrHours:1.2, openWorkOrders:0 },
+      'QR-MEZC-B1':   { name:'Mezcladora B1', sector:'Línea de Producción 2', criticality:'MEDIA', currentStatus:'PREVENTIVO', availabilityPercent:91.5, mttrHours:1.6, openWorkOrders:1 },
+      'QR-GRUA-C3':   { name:'Grúa Puente C3', sector:'Almacén', criticality:'ALTA', currentStatus:'FALLA', availabilityPercent:83.7, mttrHours:2.1, openWorkOrders:2 },
+    };
+
+    const qs = new URLSearchParams(location.search);
+    const qr = (qs.get('qr') || qs.get('m') || 'QR-PRENSA-14').toUpperCase();
+
+    const STATUS = {
+      OPERATIVA:  { theme:'ok',   label:'Operativa',  cls:'c-ok',   bar:'b-ok',   icon:'✓', sub:'Funcionando correctamente' },
+      PREVENTIVO: { theme:'warn', label:'Preventivo', cls:'c-warn', bar:'b-warn', icon:'🔧', sub:'Requiere mantenimiento programado' },
+      FALLA:      { theme:'fail', label:'Falla',      cls:'c-fail', bar:'b-fail', icon:'⚠', sub:'Requiere mantenimiento urgente' },
+    };
+
+    // Rango de lecturas "en vivo" según el estado (random, creíble)
+    function rnd(min,max,dec=0){ const v=Math.random()*(max-min)+min; return dec? +v.toFixed(dec): Math.round(v); }
+    function readings(status){
+      if(status==='OPERATIVA') return [
+        {name:'Temperatura', val:rnd(52,68), unit:'°C', pct:rnd(40,58)},
+        {name:'Vibración', val:rnd(0.8,2.4,1), unit:'mm/s', pct:rnd(18,35)},
+        {name:'Presión', val:rnd(5.5,7.5,1), unit:'bar', pct:rnd(45,62)},
+        {name:'RPM', val:rnd(1450,1520), unit:'rpm', pct:rnd(50,66)},
+      ];
+      if(status==='PREVENTIVO') return [
+        {name:'Temperatura', val:rnd(78,94), unit:'°C', pct:rnd(64,80)},
+        {name:'Vibración', val:rnd(3.2,5.1,1), unit:'mm/s', pct:rnd(60,78)},
+        {name:'Presión', val:rnd(7.4,8.6,1), unit:'bar', pct:rnd(66,80)},
+        {name:'RPM', val:rnd(1380,1460), unit:'rpm', pct:rnd(58,72)},
+      ];
+      return [
+        {name:'Temperatura', val:rnd(104,121), unit:'°C', pct:rnd(88,99)},
+        {name:'Vibración', val:rnd(6.2,9.1,1), unit:'mm/s', pct:rnd(85,99)},
+        {name:'Presión', val:rnd(8.8,9.8,1), unit:'bar', pct:rnd(82,96)},
+        {name:'RPM', val:rnd(1240,1360), unit:'rpm', pct:rnd(40,58)},
+      ];
+    }
+
+    function fmtPct(v){ return v==null? '—' : (Math.round(v*10)/10)+'%'; }
+    function fmtH(v){ return v==null? '—' : (v>=1? v.toFixed(1)+' h' : Math.round(v*60)+' min'); }
+
+    function render(d){
+      const st = STATUS[d.currentStatus] || STATUS.OPERATIVA;
+      const reads = readings(d.currentStatus);
+      const now = new Date().toLocaleString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      const sensorHtml = reads.map(r => `
+        <div class="sensor">
+          <div class="row"><span class="name">${r.name}</span></div>
+          <div style="margin-top:6px"><span class="val ${st.cls}">${r.val}</span><span class="unit">${r.unit}</span></div>
+          <div class="bar"><i class="${st.bar}" style="width:${r.pct}%"></i></div>
+        </div>`).join('');
+
+      document.getElementById('card').innerHTML = `
+        <div class="head ${st.theme}">
+          <span class="statusbadge"><span class="pulse"></span> ${st.icon} ${st.label}</span>
+          <h1>${d.name}</h1>
+          <div class="sub">${d.sector || ''}${d.sector?' · ':''}${st.sub}</div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="v">${fmtPct(d.availabilityPercent)}</div><div class="l">Disponibilidad</div></div>
+          <div class="kpi"><div class="v">${fmtH(d.mttrHours)}</div><div class="l">MTTR</div></div>
+          <div class="kpi"><div class="v">${d.openWorkOrders ?? 0}</div><div class="l">Órdenes abiertas</div></div>
+        </div>
+        <div class="section-t">📡 Sensores en vivo</div>
+        <div class="sensors">${sensorHtml}</div>
+        <div class="foot">
+          <div class="updated">Actualizado: ${now}${d.criticality?` · Criticidad ${d.criticality}`:''}</div>
+          <a class="btn" href="${APP}">Gestionar en la App →</a>
+        </div>`;
+    }
+
+    async function load(){
+      let data = null;
+      try {
+        const res = await fetch(`${API}/api/public/machines/qr/${encodeURIComponent(qr)}`, { headers:{ 'Accept':'application/json' } });
+        if (res.ok) data = await res.json();
+      } catch(e){ /* usa fallback */ }
+      if (!data) data = FALLBACK[qr] || { name:'Máquina', currentStatus:'OPERATIVA', sector:'', availabilityPercent:null, mttrHours:null, openWorkOrders:0 };
+      // El estado del QR (?s=) manda: garantiza un demo determinístico aunque
+      // el backend devuelva otra cosa. Si no viene, se usa el estado en vivo.
+      const forced = (qs.get('s') || '').toUpperCase();
+      if (STATUS[forced]) data.currentStatus = forced;
+      render(data);
+    }
+    load();
+  </script>
+</body>
+</html>

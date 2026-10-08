@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mantech Latam — Simplicidad genera Rentabilidad</title>
+  <meta name="description" content="Mantech Latam: software de gestión de mantenimiento (CMMS) para PyMEs industriales. Escaneo QR, reportes por voz y foto, KPIs automáticos (MTBF, MTTR, Disponibilidad) y planes preventivos." />
+  <meta property="og:title" content="Mantech Latam — Gestión de mantenimiento industrial" />
+  <meta property="og:description" content="Simplicidad genera Rentabilidad. Mantené tus máquinas funcionando con KPIs automáticos y una app pensada para el operario." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue: #0B3A6E;
+      --blue-deep: #07294d;
+      --blue-light: #4C84E6;
+      --green: #2F9E44;
+      --amber: #F59E0B;
+      --ink: #0F172A;
+      --muted: #64748B;
+      --bg: #F4F6F9;
+      --card: #FFFFFF;
+      --radius: 18px;
+      --shadow: 0 12px 40px rgba(11, 58, 110, 0.12);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--ink); background: var(--bg); line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+    .container { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px;
+      padding: 14px 26px; border-radius: 999px; cursor: pointer; transition: all .2s ease;
+      border: none; white-space: nowrap;
+    }
+    .btn-primary { background: linear-gradient(135deg, #1457b0, #0B3A6E); color: #fff; box-shadow: 0 10px 24px rgba(11,58,110,.35); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(11,58,110,.45); }
+    .btn-ghost { background: rgba(255,255,255,.14); color: #fff; border: 1.5px solid rgba(255,255,255,.45); backdrop-filter: blur(6px); }
+    .btn-ghost:hover { background: rgba(255,255,255,.24); }
+    .btn-dark { background: #fff; color: var(--blue); }
+    .btn-dark:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,.18); }
+
+    /* NAV */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      transition: all .3s ease; padding: 18px 0;
+    }
+    header.scrolled { background: rgba(255,255,255,.92); backdrop-filter: blur(12px); box-shadow: 0 4px 24px rgba(0,0,0,.06); padding: 12px 0; }
+    .nav { display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo .m {
+      width: 38px; height: 38px; border-radius: 10px; background: #fff; color: var(--blue);
+      font-weight: 900; font-size: 22px; display: grid; place-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    header.scrolled .logo .m { background: var(--blue); color: #fff; }
+    .logo-text { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -.4px; }
+    .logo-text span { font-weight: 400; opacity: .85; }
+    header.scrolled .logo-text { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 30px; }
+    .nav-links a.link { color: rgba(255,255,255,.92); font-weight: 600; font-size: 15px; transition: opacity .2s; }
+    header.scrolled .nav-links a.link { color: var(--ink); }
+    .nav-links a.link:hover { opacity: .65; }
+
+    /* HERO */
+    .hero {
+      position: relative; min-height: 100vh; display: flex; align-items: center;
+      background: linear-gradient(120deg, rgba(7,30,60,.92) 0%, rgba(11,58,110,.78) 45%, rgba(11,58,110,.45) 100%),
+                  url('./assets/hero-factory.jpg') center/cover no-repeat;
+      color: #fff; padding: 130px 0 80px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); padding: 8px 16px; border-radius: 999px;
+      text-transform: uppercase; margin-bottom: 26px;
+    }
+    .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .hero h1 { font-size: clamp(38px, 6vw, 68px); font-weight: 900; line-height: 1.05; letter-spacing: -1.5px; max-width: 760px; }
+    .hero h1 .accent { color: #7fb2ff; }
+    .hero p.sub { font-size: clamp(17px, 2.2vw, 21px); margin: 24px 0 36px; max-width: 560px; color: rgba(255,255,255,.88); }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-floating {
+      position: absolute; right: 6%; bottom: 12%; background: rgba(255,255,255,.97); color: var(--ink);
+      border-radius: 16px; padding: 18px 22px; box-shadow: var(--shadow); display: none; gap: 14px; align-items: center;
+    }
+    .hero-floating .ring {
+      width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; color: var(--green);
+      background: conic-gradient(var(--green) 95%, #e5e7eb 0); position: relative; font-size: 15px;
+    }
+    .hero-floating .ring::after { content: ''; position: absolute; inset: 6px; background: #fff; border-radius: 50%; }
+    .hero-floating .ring span { position: relative; z-index: 1; }
+    @media (min-width: 980px) { .hero-floating { display: flex; } }
+
+    /* STATS */
+    .stats { background: var(--blue-deep); padding: 36px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; color: #fff; }
+    .stat .num { font-size: clamp(28px, 4vw, 40px); font-weight: 900; letter-spacing: -1px; }
+    .stat .num.green { color: #4ade80; }
+    .stat .lbl { font-size: 14px; color: rgba(255,255,255,.7); margin-top: 4px; }
+
+    /* SECTIONS */
+    section.block { padding: 90px 0; }
+    .eyebrow { color: var(--blue-light); font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; font-size: 13px; }
+    .h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 900; letter-spacing: -1px; margin: 12px 0 18px; line-height: 1.1; }
+    .lead { color: var(--muted); font-size: 18px; max-width: 620px; }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .split img { border-radius: var(--radius); box-shadow: var(--shadow); width: 100%; height: 420px; object-fit: cover; }
+    .checklist { list-style: none; margin-top: 24px; display: grid; gap: 14px; }
+    .checklist li { display: flex; gap: 12px; align-items: flex-start; font-size: 16px; }
+    .checklist .ck { flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%; background: #e7f6ec; color: var(--green); display: grid; place-items: center; margin-top: 2px; }
+
+    /* FEATURES */
+    .features { background: #fff; }
+    .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 46px; }
+    .feat {
+      background: var(--bg); border: 1px solid #eef1f5; border-radius: var(--radius); padding: 28px 24px; transition: all .25s ease;
+    }
+    .feat:hover { transform: translateY(-6px); box-shadow: var(--shadow); border-color: transparent; background: #fff; }
+    .feat .ic { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #e8f0fc, #d7e6fb); display: grid; place-items: center; color: var(--blue); margin-bottom: 18px; }
+    .feat h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .feat p { color: var(--muted); font-size: 15px; }
+
+    /* INDUSTRIES */
+    .ind-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 46px; }
+    .ind {
+      position: relative; height: 320px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+      display: flex; align-items: flex-end; color: #fff;
+    }
+    .ind img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+    .ind:hover img { transform: scale(1.06); }
+    .ind .ov { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(7,30,60,.88) 0%, rgba(7,30,60,.15) 70%); }
+    .ind .txt { position: relative; padding: 28px; z-index: 1; }
+    .ind .txt h3 { font-size: 24px; font-weight: 900; }
+    .ind .txt p { color: rgba(255,255,255,.85); font-size: 15px; }
+
+    /* STEPS */
+    .steps { background: linear-gradient(135deg, var(--blue), var(--blue-deep)); color: #fff; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 26px; margin-top: 46px; }
+    .step { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: var(--radius); padding: 30px 26px; }
+    .step .n { font-size: 15px; font-weight: 900; color: var(--blue); background: #fff; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 16px; }
+    .step h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+    .step p { color: rgba(255,255,255,.8); font-size: 15px; }
+
+    /* CTA */
+    .cta { padding: 86px 0; text-align: center; }
+    .cta .box { background: linear-gradient(135deg, #1457b0, #0B3A6E); border-radius: 28px; padding: 64px 30px; color: #fff; box-shadow: var(--shadow); }
+    .cta h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 900; letter-spacing: -1px; max-width: 640px; margin: 0 auto 14px; }
+    .cta p { color: rgba(255,255,255,.85); font-size: 18px; margin-bottom: 30px; }
+
+    /* FOOTER */
+    footer { background: #06203d; color: rgba(255,255,255,.7); padding: 50px 0 34px; }
+    .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
+    .foot .logo-text { color: #fff; }
+    .foot .tag { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.55); }
+    .foot-bottom { border-top: 1px solid rgba(255,255,255,.1); margin-top: 28px; padding-top: 22px; font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+    @media (max-width: 900px) {
+      .nav-links .link { display: none; }
+      .split { grid-template-columns: 1fr; gap: 30px; }
+      .split.reverse .img-wrap { order: -1; }
+      .split img { height: 300px; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); gap: 28px; }
+      .feat-grid { grid-template-columns: repeat(2,1fr); }
+      .ind-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .feat-grid { grid-template-columns: 1fr; }
+      section.block { padding: 64px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <header id="header">
+    <div class="container nav">
+      <a href="#" class="logo">
+        <div class="m">M</div>
+        <div class="logo-text">Mantech <span>Latam</span></div>
+      </a>
+      <nav class="nav-links">
+        <a class="link" href="#solucion">Solución</a>
+        <a class="link" href="#features">Funciones</a>
+        <a class="link" href="#industrias">Industrias</a>
+        <a class="btn btn-primary" href="https://app.mantech.lat">Ingresar →</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge"><span class="dot"></span> Agroindustria · Metalmecánica</div>
+      <h1>Simplicidad genera <span class="accent">Rentabilidad</span></h1>
+      <p class="sub">El software de gestión de mantenimiento (CMMS) que mantiene tus máquinas funcionando. Adiós al Excel y a las paradas sorpresa.</p>
+      <div class="hero-cta">
+        <a class="btn btn-dark" href="https://app.mantech.lat">Ingresar a la App →</a>
+        <a class="btn btn-ghost" href="#solucion">Ver cómo funciona</a>
+      </div>
+    </div>
+    <div class="hero-floating">
+      <div class="ring"><span>95%</span></div>
+      <div>
+        <div style="font-weight:800; font-size:15px;">Disponibilidad</div>
+        <div style="color:var(--muted); font-size:13px;">3 paradas críticas evitadas</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="container stats-grid">
+      <div class="stat"><div class="num green">95%</div><div class="lbl">Disponibilidad de máquina</div></div>
+      <div class="stat"><div class="num">−40%</div><div class="lbl">Paradas no planificadas</div></div>
+      <div class="stat"><div class="num">MTTR·MTBF</div><div class="lbl">KPIs automáticos</div></div>
+      <div class="stat"><div class="num">&lt; 30s</div><div class="lbl">Para reportar una falla</div></div>
+    </div>
+  </div>
+
+  <!-- SOLUCION -->
+  <section class="block" id="solucion">
+    <div class="container split">
+      <div>
+        <div class="eyebrow">El problema → la solución</div>
+        <h2 class="h2">Del cuaderno y el Excel a decisiones con datos</h2>
+        <p class="lead">Las PyMEs industriales pierden plata por mantenimiento reactivo: 3 a 10 veces más caro que el preventivo, sin trazabilidad y dependiendo del conocimiento de una sola persona.</p>
+        <ul class="checklist">
+          <li><span class="ck">✓</span> Trazabilidad total de cada activo y cada falla.</li>
+          <li><span class="ck">✓</span> KPIs que se calculan solos al cerrar cada orden.</li>
+          <li><span class="ck">✓</span> Pensado para el operario: botones grandes, QR y voz.</li>
+        </ul>
+      </div>
+      <div class="img-wrap"><img src="./assets/ingenieria-software.jpg" alt="Ingeniera operando el sistema en planta" loading="lazy" /></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="block features" id="features">
+    <div class="container">
+      <div style="text-align:center; max-width:640px; margin:0 auto;">
+        <div class="eyebrow">Todo en una app</div>
+        <h2 class="h2">Hecho para que funcione, no para aprender</h2>
+        <p class="lead" style="margin:0 auto;">Una experiencia "Zero-Learning": cualquier operario lo usa sin capacitación.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat">
+          <div class="ic">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M17 21h.01M21 17v.01"/></svg>
+          </div>
+          <h3>Escaneo QR</h3>
+          <p>Apuntás al QR de la máquina y abrís su historial y un reporte al instante.</p>
+        </div>
+        <div class="feat">
+          <div class="ic">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          </div>
+          <h3>Reportes por voz y foto</h3>
+          <p>Si no puede escribir, el operario graba un audio o saca una foto de la falla.</p>
+        </div>
+        <div class="feat">
+          <div class="ic">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+          </div>
+          <h3>KPIs automáticos</h3>
+          <p>MTTR, MTBF, disponibilidad e índice de criticidad calculados en tiempo real.</p>
+        </div>
+        <div class="feat">
+          <div class="ic">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/></svg>
+          </div>
+          <h3>Planes preventivos</h3>
+          <p>Programá el mantenimiento y la agenda genera las órdenes automáticamente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INDUSTRIAS -->
+  <section class="block" id="industrias">
+    <div class="container">
+      <div style="text-align:center; max-width:640px; margin:0 auto;">
+        <div class="eyebrow">Para tu industria</div>
+        <h2 class="h2">Donde cada minuto de máquina cuenta</h2>
+      </div>
+      <div class="ind-grid">
+        <div class="ind">
+          <img src="./assets/metalmecanica.jpg" alt="Metalmecánica" loading="lazy" />
+          <div class="ov"></div>
+          <div class="txt"><h3>Metalmecánica</h3><p>Prensas, tornos y líneas que no pueden parar.</p></div>
+        </div>
+        <div class="ind">
+          <img src="./assets/preventivo.jpg" alt="Mantenimiento preventivo" loading="lazy" />
+          <div class="ov"></div>
+          <div class="txt"><h3>Agroindustria</h3><p>Mezcladoras, cintas y equipos críticos de producción.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section class="block steps">
+    <div class="container">
+      <div style="text-align:center; max-width:640px; margin:0 auto;">
+        <div class="eyebrow" style="color:#7fb2ff;">Así de simple</div>
+        <h2 class="h2">3 pasos y listo</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step"><div class="n">1</div><h3>Escaneá el QR</h3><p>El operario identifica la máquina con la cámara del teléfono.</p></div>
+        <div class="step"><div class="n">2</div><h3>Reportá la falla</h3><p>Foto, audio o un toque. La orden de trabajo se crea sola.</p></div>
+        <div class="step"><div class="n">3</div><h3>Resolvé y medí</h3><p>El técnico la cierra y los KPIs se actualizan automáticamente.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container">
+      <div class="box">
+        <h2>Empezá a cuidar la disponibilidad de tus máquinas</h2>
+        <p>Probá Mantech ahora. Sin instalaciones, desde el navegador.</p>
+        <a class="btn btn-dark" href="https://app.mantech.lat">Ingresar a la App →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="foot">
+        <a href="#" class="logo">
+          <div class="m" style="background:var(--blue); color:#fff;">M</div>
+          <div class="logo-text">Mantech <span>Latam</span></div>
+        </a>
+        <div class="tag">Agroindustria · Metalmecánica</div>
+        <a class="btn btn-primary" href="https://app.mantech.lat">Ingresar a la App</a>
+      </div>
+      <div class="foot-bottom">
+        <div>© <span id="year"></span> Mantech Latam · Gestión de mantenimiento industrial</div>
+        <div>Hecho en Argentina 🇦🇷</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const header = document.getElementById('header');
+    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# ---- Backend (Maven / Spring Boot) ----
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+!backend/.mvn/wrapper/*.properties
+
+# Archivos que sube el operario desde la app (fotos y audios de los reportes).
+backend/uploads/
+uploads/
+
+# ---- Frontend (Expo / React Native) ----
+frontend/app-mantech/node_modules/
+frontend/app-mantech/dist/
+frontend/app-mantech/.expo/
+frontend/app-mantech/web-build/
+frontend/app-mantech/.expo-shared/
+node_modules/
+
+# ---- Secretos y configuración local ----
+# El firmware se versiona con marcadores de posición; la copia con las claves
+# reales de WiFi y del dispositivo no debe salir de la máquina de quien arma.
+firmware/mantech-sensor/config.local.h
+.env
+.env.*
+!.env.example
+*.local
+
+# ---- Entorno de desarrollo ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ---- Registros y temporales ----
+*.log
+npm-debug.log*
+yarn-error.log*
+tmp/

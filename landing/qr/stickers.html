@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stickers QR — Mantech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root { --blue:#0B3A6E; --green:#15803D; --amber:#B45309; --red:#B91C1C; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#eef2f7; padding:24px; color:#0F172A; }
+    .note { max-width:840px; margin:0 auto 20px; background:#fff; border-radius:12px; padding:16px 20px; font-size:14px; color:#475569; box-shadow:0 4px 16px rgba(0,0,0,.06); }
+    .note b{ color:var(--blue); }
+    .sheet { max-width:840px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .sticker { background:#fff; border-radius:18px; overflow:hidden; border:2px dashed #cbd5e1; }
+    .st-top { padding:14px 16px; color:#fff; display:flex; align-items:center; justify-content:space-between; }
+    .st-top.ok{background:linear-gradient(135deg,#16a34a,#15803D);} .st-top.warn{background:linear-gradient(135deg,#f59e0b,#B45309);} .st-top.fail{background:linear-gradient(135deg,#ef4444,#B91C1C);} .st-top.blue{background:linear-gradient(135deg,#1457b0,#0B3A6E);}
+    .brand { display:flex; align-items:center; gap:8px; font-weight:800; font-size:15px; }
+    .brand .m { width:26px; height:26px; border-radius:7px; background:#fff; color:var(--blue); display:grid; place-items:center; font-weight:900; font-size:16px; }
+    .pill { background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.4); padding:4px 10px; border-radius:999px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
+    .st-body { padding:16px; text-align:center; }
+    .st-body img { width:185px; height:185px; }
+    .mname { font-size:19px; font-weight:900; color:var(--blue); margin-top:6px; }
+    .msector { font-size:13px; color:#64748B; }
+    .scan { margin-top:8px; font-size:12px; color:#94a3b8; font-weight:600; }
+    @media print {
+      body { background:#fff; padding:0; }
+      .note { display:none; }
+      .sheet { gap:10px; }
+      .sticker { break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="note">
+    🖨️ <b>Cómo usar:</b> imprimí esta hoja (Ctrl/Cmd + P), recortá por la línea punteada y pegá cada sticker en su máquina.
+    Cada QR abre la página pública de estado de esa máquina al escanearlo con la cámara del celular. El último QR lleva al sitio de Mantech.
+  </div>
+
+  <div class="sheet">
+    <div class="sticker">
+      <div class="st-top ok">
+        <div class="brand"><span class="m">M</span> Mantech</div>
+        <span class="pill">● Operativa</span>
+      </div>
+      <div class="st-body">
+        <img src="./qr-prensa-14_OPERATIVA.png" alt="QR Prensa #14" />
+        <div class="mname">Prensa #14</div>
+        <div class="msector">Línea de Producción 1</div>
+        <div class="scan">📷 Escaneá para ver el estado</div>
+      </div>
+    </div>
+
+    <div class="sticker">
+      <div class="st-top warn">
+        <div class="brand"><span class="m">M</span> Mantech</div>
+        <span class="pill">● Preventivo</span>
+      </div>
+      <div class="st-body">
+        <img src="./qr-mezcladora-b1_PREVENTIVO.png" alt="QR Mezcladora B1" />
+        <div class="mname">Mezcladora B1</div>
+        <div class="msector">Línea de Producción 2</div>
+        <div class="scan">📷 Escaneá para ver el estado</div>
+      </div>
+    </div>
+
+    <div class="sticker">
+      <div class="st-top fail">
+        <div class="brand"><span class="m">M</span> Mantech</div>
+        <span class="pill">● Falla</span>
+      </div>
+      <div class="st-body">
+        <img src="./qr-grua-c3_FALLA.png" alt="QR Grúa Puente C3" />
+        <div class="mname">Grúa Puente C3</div>
+        <div class="msector">Almacén</div>
+        <div class="scan">📷 Escaneá para ver el estado</div>
+      </div>
+    </div>
+
+    <div class="sticker">
+      <div class="st-top blue">
+        <div class="brand"><span class="m">M</span> Mantech</div>
+        <span class="pill">Sitio web</span>
+      </div>
+      <div class="st-body">
+        <img src="./qr-acceso-sitio.png" alt="QR sitio Mantech" />
+        <div class="mname">Conocé Mantech</div>
+        <div class="msector">www.mantech.lat</div>
+        <div class="scan">📷 Escaneá para visitar el sitio</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,96 +1,152 @@
-import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import BottomNav from '../components/BottomNav'; // <-- IMPORTAMOS EL MENÚ INFERIOR
-import { styles } from '../styles/about.styles'; 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Screen, AppHeader, Card, Txt, Button, SectionTitle } from '../src/ui';
+import { color, layout, radius, space } from '../src/theme/tokens';
+
+const AUDIENCES = [
+  'Operarios de línea',
+  'Supervisores de turno',
+  'Mantenimiento mecánico y eléctrico',
+  'Jefes de planta',
+];
+
+const STEPS: { icon: keyof typeof Ionicons.glyphMap; title: string; text: string }[] = [
+  {
+    icon: 'qr-code-outline',
+    title: 'Escaneás el QR de la máquina',
+    text: 'El código pegado en el equipo identifica el activo y su historial.',
+  },
+  {
+    icon: 'options-outline',
+    title: 'Elegís el estado',
+    text: 'Operativa, en preventivo o en falla: el semáforo que ya se usa en planta.',
+  },
+  {
+    icon: 'send-outline',
+    title: 'Mandás foto, texto o audio',
+    text: 'Si no podés escribir con guantes, grabás un audio y listo.',
+  },
+];
 
 export default function AboutScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* TÍTULOS PRINCIPALES */}
-        <Text style={styles.mainTitle}>Somos Mantech</Text>
-        <Text style={styles.subtitleBold}>
-          Gestión de Excelencia en Mantenimiento pensada para la planta real
-        </Text>
-        <Text style={styles.subtitleLight}>
-          Hecho para operarios, supervisores y mantenimiento de Agroindustria Metalmecánica.
-        </Text>
+    <Screen header={<AppHeader title="Somos Mantech" subtitle="Gestión de mantenimiento" back />}>
+      <View style={styles.prose}>
+        <Card style={styles.card}>
+          <Txt variant="h2">Gestión de excelencia en mantenimiento, pensada para la planta real</Txt>
+          <Txt variant="bodyLg" tone="secondary">
+            Hecho para operarios, supervisores y mantenimiento de la agroindustria metalmecánica.
+          </Txt>
+        </Card>
 
-        {/* TARJETA: ¿Qué hacemos? */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <MaterialCommunityIcons name="clipboard-check-outline" size={28} color="#0B3A6E" />
-            <Text style={styles.cardTitle}>¿Qué hacemos?</Text>
+        <Card style={styles.card}>
+          <View style={styles.cardHead}>
+            <View style={styles.icon}>
+              <Ionicons name="clipboard-outline" size={20} color={color.brand} />
+            </View>
+            <Txt variant="h3">¿Qué hacemos?</Txt>
           </View>
-          <Text style={styles.cardText}>
-            Mantech es una app para registrar fallas, revisar el estado de máquinas y organizar el mantenimiento en planta.{"\n\n"}
-            La usamos para que el operario pueda avisar rápido y el equipo de mantenimiento tenga la información clara para actuar.
-          </Text>
-        </View>
+          <Txt variant="body" tone="secondary">
+            Mantech es una app para registrar fallas, revisar el estado de las máquinas y organizar
+            el mantenimiento en planta.
+          </Txt>
+          <Txt variant="body" tone="secondary">
+            La usamos para que el operario pueda avisar rápido y el equipo de mantenimiento tenga la
+            información clara para actuar.
+          </Txt>
+        </Card>
 
-        {/* SECCIÓN: Pensado para el día a día */}
-        <View style={styles.listSection}>
-          <Text style={styles.sectionTitle}>Pensado para el día a día en fábrica</Text>
-          <View style={styles.listItem}>
-            <Text style={styles.listBullet}>•</Text>
-            <Text style={styles.listText}>Operarios de línea</Text>
-          </View>
-          <View style={styles.listItem}>
-            <Text style={styles.listBullet}>•</Text>
-            <Text style={styles.listText}>Supervisores de turno</Text>
-          </View>
-          <View style={styles.listItem}>
-            <Text style={styles.listBullet}>•</Text>
-            <Text style={styles.listText}>Mantenimiento mecánico / eléctrico</Text>
-          </View>
-          <View style={styles.listItem}>
-            <Text style={styles.listBullet}>•</Text>
-            <Text style={styles.listText}>Jefes de planta</Text>
-          </View>
-        </View>
+        <SectionTitle title="Pensado para el día a día en fábrica" />
+        <Card style={styles.card}>
+          {AUDIENCES.map((a) => (
+            <View key={a} style={styles.listRow}>
+              <Ionicons name="checkmark-circle" size={20} color={color.success} />
+              <Txt variant="body" style={styles.listText}>
+                {a}
+              </Txt>
+            </View>
+          ))}
+        </Card>
 
-        {/* TARJETA: Cómo funciona */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Feather name="help-circle" size={24} color="#0B3A6E" />
-            <Text style={styles.cardTitle}>Cómo funciona en Planta</Text>
-          </View>
-          
-          <View style={styles.stepRow}>
-            <MaterialCommunityIcons name="qrcode-scan" size={20} color="#0B3A6E" style={styles.stepIcon} />
-            <Text style={styles.stepText}>Escanéas el QR de la Máquina</Text>
-          </View>
-          
-          <View style={styles.stepRow}>
-            <MaterialCommunityIcons name="traffic-light" size={20} color="#0B3A6E" style={styles.stepIcon} />
-            <Text style={styles.stepText}>Elegís: Operativa, Preventiva o Falla</Text>
-          </View>
-          
-          <View style={styles.stepRow}>
-            <Feather name="send" size={18} color="#0B3A6E" style={styles.stepIcon} />
-            <Text style={styles.stepText}>Mandas foto, texto o audio</Text>
-          </View>
-        </View>
+        <SectionTitle title="Cómo funciona en planta" />
+        <Card style={styles.card}>
+          {STEPS.map((s, i) => (
+            <View key={s.title} style={styles.stepRow}>
+              <View style={styles.stepNumber}>
+                <Txt variant="captionStrong" tone="brand" tabular>
+                  {i + 1}
+                </Txt>
+              </View>
+              <View style={styles.stepBody}>
+                <View style={styles.stepTitle}>
+                  <Ionicons name={s.icon} size={18} color={color.brand} />
+                  <Txt variant="bodyStrong">{s.title}</Txt>
+                </View>
+                <Txt variant="caption" tone="secondary">
+                  {s.text}
+                </Txt>
+              </View>
+            </View>
+          ))}
+        </Card>
 
-        {/* BOTÓN CALL TO ACTION */}
-        <TouchableOpacity 
-            style={styles.ctaButton} 
+        <Card tone="sunken" style={styles.cta}>
+          <Txt variant="h3" align="center">
+            Empezá a usar Mantech
+          </Txt>
+          <Txt variant="caption" tone="secondary" align="center">
+            Registrá tu primer reporte en menos de un minuto.
+          </Txt>
+          <Button
+            label="Reportar una falla"
+            icon="alert-circle-outline"
+            size="lg"
+            block
             onPress={() => router.push('/report')}
-            >
-            <Text style={styles.ctaButtonText}>Empezar a usar Mantech</Text>
-            <Text style={styles.ctaSubText}>Registra tu primera Máquina en menos de 1 minuto</Text>
-        </TouchableOpacity>
-
-      </ScrollView>
-
-      {/* RENDERIZAMOS EL COMPONENTE REUTILIZABLE DEL MENÚ INFERIOR */}
-      <BottomNav activeRoute="home" />
-      
-    </SafeAreaView>
+            accessibilityHint="Abre el formulario de reporte de falla"
+          />
+          <Button
+            label="Ver soporte y preguntas frecuentes"
+            variant="ghost"
+            icon="help-buoy-outline"
+            block
+            onPress={() => router.push('/support')}
+            accessibilityHint="Abre la pantalla de soporte"
+          />
+        </Card>
+      </View>
+    </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  prose: { width: '100%', maxWidth: layout.maxProseWidth, alignSelf: 'center', gap: space.lg },
+  card: { gap: space.sm },
+  cardHead: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  icon: {
+    width: space.xxxl,
+    height: space.xxxl,
+    borderRadius: radius.pill,
+    backgroundColor: color.brandSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  listText: { flex: 1 },
+  stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md },
+  stepNumber: {
+    width: space.xxl,
+    height: space.xxl,
+    borderRadius: radius.pill,
+    backgroundColor: color.brandSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepBody: { flex: 1, gap: space.xxs },
+  stepTitle: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  cta: { gap: space.md, alignItems: 'stretch' },
+});

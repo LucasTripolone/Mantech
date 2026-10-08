@@ -10,8 +10,10 @@ import com.mantech.app.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,16 @@ public class MachineService {
     private final MachineRepository machineRepository;
     private final MachineStatusHistoryRepository statusHistoryRepository;
     private final UserRepository userRepository;
+
+    public List<MachineResponse> listAll() {
+        return machineRepository.findAll().stream().map(machine -> {
+            String currentStatus = statusHistoryRepository
+                    .findFirstByMachineIdOrderByCreatedAtDesc(machine.getId())
+                    .map(MachineStatusHistory::getStatus)
+                    .orElse("OPERATIVA");
+            return toResponse(machine, currentStatus);
+        }).toList();
+    }
 
     public MachineResponse findByQrCode(String qrCode) {
         Machine machine = machineRepository.findByQrCode(qrCode)
@@ -49,7 +61,20 @@ public class MachineService {
         return statusHistoryRepository.findByMachineIdOrderByCreatedAtDesc(machineId);
     }
 
+    /** Estados operativos válidos de una máquina. */
+    private static final Set<String> VALID_STATUSES = Set.of("OPERATIVA", "PREVENTIVO", "FALLA");
+
+    @Transactional
     public void updateStatus(Long machineId, String status, String reason) {
+        // Sin esta validación se persiste cualquier texto, y como las métricas
+        // comparan contra estos literales exactos, un valor fuera del dominio
+        // desaparece de los cálculos sin producir ningún error.
+        String normalized = status == null ? null : status.trim().toUpperCase();
+        if (normalized == null || !VALID_STATUSES.contains(normalized)) {
+            throw new IllegalArgumentException(
+                    "Estado inválido. Valores permitidos: OPERATIVA, PREVENTIVO, FALLA.");
+        }
+
         Machine machine = machineRepository.findById(machineId)
                 .orElseThrow(() -> new RuntimeException("Máquina no encontrada: " + machineId));
 
@@ -60,7 +85,7 @@ public class MachineService {
         MachineStatusHistory history = MachineStatusHistory.builder()
                 .machine(machine)
                 .changedByUser(currentUser)
-                .status(status)
+                .status(normalized)
                 .reason(reason)
                 .build();
 

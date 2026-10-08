@@ -2,12 +2,10 @@
 INSERT INTO plants (name, location) VALUES
     ('Planta Principal', 'Buenos Aires, Argentina');
 
--- Usuario admin de prueba
--- password: mantech123 (BCrypt)
-INSERT INTO users (plant_id, role_id, first_name, last_name, email, password, shift, active)
-VALUES (1, 4, 'Admin', 'Mantech', 'admin@mantech.com',
-        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
-        'MANANA', TRUE);
+-- NOTA: el usuario admin (admin@mantech.com) lo crea DataSeeder.java, con la
+--       contrasena que venga en SEED_ADMIN_PASSWORD.
+-- usando el PasswordEncoder de la app, para garantizar que el hash coincida con la
+-- contrasena documentada. No se inserta aca para evitar un hash inconsistente.
 
 -- Maquinas de ejemplo
 INSERT INTO machines (plant_id, name, qr_code, sector, criticality) VALUES

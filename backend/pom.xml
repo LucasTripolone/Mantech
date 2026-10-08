@@ -45,7 +45,10 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Flyway - migraciones de base de datos -->
+		<!-- Flyway - migraciones de base de datos.
+		     En Spring Boot 4 la autoconfiguracion de Flyway se movio a un modulo
+		     aparte que ademas interfiere con el escaneo de repositorios JPA, asi
+		     que ejecutamos Flyway programaticamente (ver config/FlywayConfig.java). -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>

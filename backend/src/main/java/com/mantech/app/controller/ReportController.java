@@ -6,6 +6,7 @@ import com.mantech.app.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +40,10 @@ public class ReportController {
     }
 
     // PATCH /api/reports/{id}/resolve
+    // Dar por resuelto un reporte de falla es una decisión de mantenimiento:
+    // el operario reporta, no cierra.
     @PatchMapping("/{id}/resolve")
+    @PreAuthorize("hasAnyRole('MANTENIMIENTO','SUPERVISOR','JEFE_PLANTA')")
     public ResponseEntity<ReportResponse> resolveReport(@PathVariable Long id) {
         return ResponseEntity.ok(reportService.resolveReport(id));
     }

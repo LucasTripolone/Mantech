@@ -1,44 +1,44 @@
 // ============================================================================
 //  Mantech Latam - Prueba 4: diagnostico del bus 1-Wire
 //
-//  Mide la tension del propio pin de datos (GPIO 4) y ademas intenta el
-//  "reset" del protocolo 1-Wire, que es el saludo con el que el sensor avisa
-//  que esta presente.
+//  Mira el estado del pin de datos e intenta el "reset" del protocolo 1-Wire,
+//  que es el saludo con el que el sensor avisa que esta presente.
 //
-//  No hace falta conectar ningun cable extra: mide el mismo pin donde ya
-//  esta el bus.
+//  Cambia PIN_DATOS por el GPIO donde tengas el bus. No hace falta conectar
+//  ningun cable extra.
+//
+//  NOTA: el ESP32 solo puede medir tension en algunos pines (ADC). En los
+//  demas se informa el nivel logico, que para este diagnostico alcanza: lo
+//  que importa es si la resistencia logra mantener el bus en alto.
 //
 //  COMO SE LEE EL RESULTADO
 //
-//   Tension ~3,3 V  +  presencia SI
-//        -> todo bien, el sensor contesta.
-//
-//   Tension ~3,3 V  +  presencia NO
-//        -> la resistencia funciona, pero el sensor no responde.
-//           El problema es el sensor o el contacto de sus cables.
-//
-//   Tension ~0 V
-//        -> algo esta llevando el bus a masa: el sensor mal conectado
-//           (cables cruzados) o danado.
-//
-//   Tension intermedia o que baila
-//        -> la resistencia no hace buen contacto; el bus queda al aire.
+//   Bus en ALTO  +  presencia SI  -> todo bien, el sensor contesta.
+//   Bus en ALTO  +  presencia NO  -> la resistencia funciona pero el sensor
+//                                    no responde: sensor o sus contactos.
+//   Bus en BAJO                   -> algo lleva la linea a masa.
 // ============================================================================
 
 #include <OneWire.h>
 
-#define PIN_DATOS 4
+#define PIN_DATOS 5
 
 OneWire bus(PIN_DATOS);
 int vuelta = 0;
 
-int medirBusMilivolts() {
-  // Soltamos el pin para que lo gobierne solo la resistencia de pull-up.
-  pinMode(PIN_DATOS, INPUT);
-  delay(5);
+/** Pines del ESP32 que pueden medir tension. El resto solo lee alto/bajo. */
+bool tieneADC(int pin) {
+  const int conADC[] = { 0, 2, 4, 12, 13, 14, 15, 25, 26, 27, 32, 33, 34, 35, 36, 39 };
+  for (unsigned i = 0; i < sizeof(conADC) / sizeof(conADC[0]); i++) {
+    if (conADC[i] == pin) return true;
+  }
+  return false;
+}
+
+int medirMilivolts(int pin) {
   long suma = 0;
   for (int i = 0; i < 24; i++) {
-    suma += analogReadMilliVolts(PIN_DATOS);
+    suma += analogReadMilliVolts(pin);
     delay(2);
   }
   return (int)(suma / 24);
@@ -53,43 +53,48 @@ void setup() {
   Serial.println("==========================================");
   Serial.println(" Mantech - Diagnostico del bus 1-Wire");
   Serial.println("==========================================");
-  Serial.println(" Mide el pin de datos (GPIO 4) y busca al sensor.");
+  Serial.print(" Pin de datos: GPIO ");
+  Serial.println(PIN_DATOS);
+  Serial.print(" Medicion de tension: ");
+  Serial.println(tieneADC(PIN_DATOS) ? "disponible" : "no disponible en este pin (se usa nivel logico)");
   Serial.println("------------------------------------------");
 }
 
 void loop() {
   vuelta++;
 
-  int mv = medirBusMilivolts();
+  // Soltamos el pin para que lo gobierne solo la resistencia de pull-up.
+  pinMode(PIN_DATOS, INPUT);
+  delay(5);
 
-  // El reset del protocolo: si hay un sensor escuchando, contesta tirando
-  // la linea a cero un instante. reset() devuelve 1 cuando detecta esa respuesta.
+  bool alto = digitalRead(PIN_DATOS) == HIGH;
+  int mv = tieneADC(PIN_DATOS) ? medirMilivolts(PIN_DATOS) : -1;
+
+  // Si hay un sensor escuchando, contesta tirando la linea a cero un instante.
   bool presencia = bus.reset();
 
   Serial.println();
   Serial.print("[");
   Serial.print(vuelta);
-  Serial.print("]  Tension del bus: ");
-  Serial.print(mv);
-  Serial.print(" mV    Presencia del sensor: ");
+  Serial.print("]  Bus: ");
+  Serial.print(alto ? "ALTO" : "BAJO");
+  if (mv >= 0) {
+    Serial.print(" (");
+    Serial.print(mv);
+    Serial.print(" mV)");
+  }
+  Serial.print("    Presencia del sensor: ");
   Serial.println(presencia ? "SI" : "NO");
 
-  Serial.print("     Diagnostico: ");
-  if (mv > 2800 && presencia) {
+  Serial.print("     ");
+  if (alto && presencia) {
     Serial.println("TODO BIEN. El sensor esta contestando.");
-  } else if (mv > 2800 && !presencia) {
+  } else if (alto && !presencia) {
     Serial.println("La resistencia funciona (bus en alto), pero el sensor no contesta.");
-    Serial.println("     -> Revisa los cables del sensor: rojo al riel +, negro al riel -,");
-    Serial.println("        amarillo a la columna del bus. Fijate que los conectores");
-    Serial.println("        hagan buen contacto; proba con otro cable si tenes.");
-  } else if (mv < 500) {
-    Serial.println("El bus esta a MASA. Algo lo esta llevando a cero.");
-    Serial.println("     -> Lo mas probable: los cables del sensor cruzados (el amarillo");
-    Serial.println("        donde va el negro), o el sensor danado. Proba desconectando");
-    Serial.println("        SOLO el sensor: si el bus sube a 3,3 V, el problema es el sensor.");
+    Serial.println("     -> Revisa los cables del sensor y sus contactos.");
   } else {
-    Serial.println("Tension intermedia: el bus queda al aire.");
-    Serial.println("     -> La resistencia no esta haciendo contacto, o no va al riel +.");
+    Serial.println("El bus esta en BAJO. La resistencia no lo esta levantando,");
+    Serial.println("     -> o algo lo lleva a masa. Revisa la resistencia y su columna.");
   }
 
   delay(2500);
